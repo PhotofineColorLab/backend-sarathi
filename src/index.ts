@@ -40,7 +40,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/admin-das
   });
 
 // Routes
-app.use('/', () => {response.json("Welcome to Sarathi")});
+app.use('/', (req, res) => {res.json("Welcome to Sarathi")});
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/staff', staffRoutes);
