@@ -40,10 +40,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/admin-das
   });
 
 // Routes
-app.use('/', (req, res) => {res.json("Welcome to Sarathi")});
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/staff', staffRoutes);
+app.use('/', (req, res) => {res.json("Welcome to Sarathi")});
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
