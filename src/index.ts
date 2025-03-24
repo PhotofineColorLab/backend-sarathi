@@ -34,6 +34,19 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/admin-das
       });
       console.log('Admin user created');
     }
+
+    // Initialize Special Staff if not exists
+    const specialStaffExists = await Staff.findOne({ email: 'special@electrical.com' });
+    if (!specialStaffExists) {
+      await Staff.create({
+        name: 'Special Staff',
+        email: 'special@electrical.com',
+        password: 'special123',
+        role: 'staff',
+        phone: '+1 (555) 999-9999',
+      });
+      console.log('Special Staff created');
+    }
   })
   .catch((error) => {
     console.error('MongoDB connection error:', error);

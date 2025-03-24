@@ -26,6 +26,7 @@ export interface IOrder extends Document {
   orderImage?: string;
   isPaid: boolean;
   paidAt?: Date;
+  iswithout?: boolean;
 }
 
 const OrderItemSchema = new Schema({
@@ -62,7 +63,8 @@ const OrderSchema = new Schema({
   scheduledDate: { type: Date },
   orderImage: { type: String },
   isPaid: { type: Boolean, default: false },
-  paidAt: { type: Date }
+  paidAt: { type: Date },
+  iswithout: { type: Boolean, default: false }
 });
 
 // Update the updatedAt timestamp before saving

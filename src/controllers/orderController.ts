@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Order, { IOrder } from '../models/Order';
 import { cloudinary } from '../config/cloudinary';
+import { Staff } from '../models/Staff';
 
 // Get all orders
 export const getOrders = async (req: Request, res: Response): Promise<void> => {
@@ -41,6 +42,14 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         req.body.orderImage = file.path;
       } else if (file.secure_url) {
         req.body.orderImage = file.secure_url;
+      }
+    }
+    
+    // Check if order is assigned to Special Staff
+    if (req.body.assignedTo) {
+      const specialStaff = await Staff.findOne({ email: 'special@electrical.com' });
+      if (specialStaff && req.body.assignedTo === specialStaff._id.toString()) {
+        req.body.iswithout = true;
       }
     }
     
