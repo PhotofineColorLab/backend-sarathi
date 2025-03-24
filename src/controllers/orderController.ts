@@ -48,6 +48,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     
     const order = new Order(req.body);
     await order.save();
+    console.log('Order saved with orderNumber:', order.orderNumber);
     res.status(201).json(order);
   } catch (error: any) {
     console.error('Order creation error:', error);

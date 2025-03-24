@@ -8,6 +8,7 @@ export interface IOrderItem {
 }
 
 export interface IOrder extends Document {
+  orderNumber: string;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
@@ -35,6 +36,7 @@ const OrderItemSchema = new Schema({
 });
 
 const OrderSchema = new Schema({
+  orderNumber: { type: String, unique: true },
   customerName: { type: String, required: true },
   customerEmail: { type: String, required: true },
   customerPhone: { type: String, required: true },
@@ -66,6 +68,47 @@ const OrderSchema = new Schema({
 // Update the updatedAt timestamp before saving
 OrderSchema.pre('save', function(next) {
   this.updatedAt = new Date();
+  next();
+});
+
+// Generate sequential order number before saving
+OrderSchema.pre('save', async function(next) {
+  console.log('Pre-save hook running, current orderNumber:', this.orderNumber);
+  // Only set order number if it doesn't exist
+  if (!this.orderNumber) {
+    try {
+      // Find the order with the highest number
+      const lastOrder = await mongoose.model('Order').findOne(
+        { orderNumber: { $exists: true, $ne: null } },  // Only find docs with orderNumber
+        {},
+        { sort: { 'orderNumber': -1 } }
+      );
+      console.log('Last order found:', lastOrder ? lastOrder.orderNumber : 'None');
+      
+      let nextNumber = 1;
+      
+      // If there's an existing order with a number
+      if (lastOrder && lastOrder.orderNumber) {
+        // Extract the number part
+        const match = lastOrder.orderNumber.match(/ORD(\d+)/);
+        console.log('Regex match:', match);
+        if (match && match[1]) {
+          // Increment the last number
+          nextNumber = parseInt(match[1]) + 1;
+          console.log('Next number will be:', nextNumber);
+        }
+      }
+      
+      // Format with leading zeros (e.g., ORD001)
+      this.orderNumber = `ORD${nextNumber.toString().padStart(3, '0')}`;
+      console.log(`Generated new order number: ${this.orderNumber}`);
+    } catch (error) {
+      console.error('Error generating order number:', error);
+      // Fallback to timestamp-based ID if there's an error
+      const timestamp = new Date().getTime();
+      this.orderNumber = `ORD${timestamp}`;
+    }
+  }
   next();
 });
 
