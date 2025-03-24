@@ -38,7 +38,7 @@ const OrderItemSchema = new Schema({
 const OrderSchema = new Schema({
   orderNumber: { type: String, unique: true },
   customerName: { type: String, required: true },
-  customerEmail: { type: String, required: true },
+  customerEmail: { type: String, required: false },
   customerPhone: { type: String, required: true },
   items: [OrderItemSchema],
   total: { type: Number, required: true },
