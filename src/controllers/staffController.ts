@@ -134,4 +134,154 @@ export const loginStaff = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({ message: 'Error logging in' });
   }
+};
+
+// Record attendance for a staff member
+export const recordAttendance = async (req: Request, res: Response) => {
+  try {
+    const { staffId } = req.params;
+    const { date, isPresent, remarks } = req.body;
+    
+    // Validate the date format
+    const attendanceDate = new Date(date);
+    if (isNaN(attendanceDate.getTime())) {
+      return res.status(400).json({ message: 'Invalid date format' });
+    }
+    
+    // Find staff member
+    const staff = await Staff.findById(staffId);
+    if (!staff) {
+      return res.status(404).json({ message: 'Staff member not found' });
+    }
+    
+    // Check if attendance for this date already exists
+    const today = new Date(attendanceDate);
+    today.setHours(0, 0, 0, 0);
+    
+    const existingAttendanceIndex = staff.attendance.findIndex(a => {
+      const attendanceDate = new Date(a.date);
+      attendanceDate.setHours(0, 0, 0, 0);
+      return attendanceDate.getTime() === today.getTime();
+    });
+    
+    if (existingAttendanceIndex !== -1) {
+      // Update existing attendance
+      staff.attendance[existingAttendanceIndex].isPresent = isPresent;
+      if (remarks) {
+        staff.attendance[existingAttendanceIndex].remarks = remarks;
+      }
+    } else {
+      // Add new attendance record
+      staff.attendance.push({
+        date: today,
+        isPresent,
+        remarks
+      });
+    }
+    
+    await staff.save();
+    
+    // Return the updated staff without password
+    const updatedStaff = await Staff.findById(staffId).select('-password');
+    res.json(updatedStaff);
+  } catch (error) {
+    console.error('Error recording attendance:', error);
+    res.status(500).json({ message: 'Error recording attendance' });
+  }
+};
+
+// Get attendance for a staff member 
+export const getStaffAttendance = async (req: Request, res: Response) => {
+  try {
+    const { staffId } = req.params;
+    const { startDate, endDate } = req.query;
+    
+    // Find staff member
+    const staff = await Staff.findById(staffId).select('-password');
+    if (!staff) {
+      return res.status(404).json({ message: 'Staff member not found' });
+    }
+    
+    // Filter attendance by date range if provided
+    let filteredAttendance = staff.attendance;
+    
+    if (startDate || endDate) {
+      const start = startDate ? new Date(startDate as string) : new Date(0);
+      const end = endDate ? new Date(endDate as string) : new Date();
+      
+      // Set end date to end of day
+      end.setHours(23, 59, 59, 999);
+      
+      filteredAttendance = staff.attendance.filter(a => {
+        const attendanceDate = new Date(a.date);
+        return attendanceDate >= start && attendanceDate <= end;
+      });
+    }
+    
+    // Sort attendance by date (newest first)
+    filteredAttendance.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    res.json({
+      staffId: staff._id,
+      name: staff.name,
+      attendance: filteredAttendance
+    });
+  } catch (error) {
+    console.error('Error fetching attendance:', error);
+    res.status(500).json({ message: 'Error fetching attendance' });
+  }
+};
+
+// Get all staff attendance for a specific date
+export const getAllStaffAttendanceByDate = async (req: Request, res: Response) => {
+  try {
+    const { date } = req.query;
+    
+    console.log('getAllStaffAttendanceByDate called with date:', date);
+    
+    if (!date) {
+      console.log('Error: Date parameter is missing');
+      return res.status(400).json({ message: 'Date parameter is required' });
+    }
+    
+    // Convert date string to Date object
+    const targetDate = new Date(date as string);
+    targetDate.setHours(0, 0, 0, 0);
+    
+    if (isNaN(targetDate.getTime())) {
+      console.log('Error: Invalid date format:', date);
+      return res.status(400).json({ message: 'Invalid date format' });
+    }
+    
+    // Find all staff members
+    const allStaff = await Staff.find().select('-password');
+    console.log(`Found ${allStaff.length} staff members`);
+    
+    // Map staff data with their attendance for the specified date
+    const staffAttendance = allStaff.map(staff => {
+      const attendanceForDate = staff.attendance?.find(a => {
+        const attendanceDate = new Date(a.date);
+        attendanceDate.setHours(0, 0, 0, 0);
+        return attendanceDate.getTime() === targetDate.getTime();
+      });
+      
+      return {
+        staffId: staff._id,
+        name: staff.name,
+        email: staff.email,
+        role: staff.role,
+        attendance: attendanceForDate || null
+      };
+    });
+    
+    console.log('Sending response with staffAttendance:', staffAttendance.length);
+    
+    res.json({
+      date: targetDate,
+      staffAttendance
+    });
+  } catch (error) {
+    console.error('Error fetching all staff attendance:', error);
+    res.status(500).json({ message: 'Error fetching all staff attendance' });
+  }
 }; 

@@ -1,6 +1,12 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+interface IAttendance {
+  date: Date;
+  isPresent: boolean;
+  remarks?: string;
+}
+
 export interface IStaff extends Document {
   name: string;
   email: string;
@@ -8,8 +14,24 @@ export interface IStaff extends Document {
   role: 'admin' | 'staff';
   phone?: string;
   createdAt: Date;
+  attendance: IAttendance[];
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
+
+const AttendanceSchema = new Schema({
+  date: {
+    type: Date,
+    required: true,
+  },
+  isPresent: {
+    type: Boolean,
+    required: true,
+    default: true,
+  },
+  remarks: {
+    type: String,
+  }
+}, { _id: false });
 
 const staffSchema = new Schema<IStaff>({
   name: {
@@ -43,6 +65,10 @@ const staffSchema = new Schema<IStaff>({
     type: Date,
     default: Date.now,
   },
+  attendance: {
+    type: [AttendanceSchema],
+    default: [],
+  }
 });
 
 // Hash password before saving
