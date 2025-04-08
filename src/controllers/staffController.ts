@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Staff, IStaff } from '../models/Staff';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -32,11 +33,54 @@ export const createStaff = async (req: Request, res: Response) => {
   try {
     const { name, email, password, role, phone } = req.body;
 
+    console.log('Received staff creation request:', { 
+      name, 
+      email, 
+      role, 
+      phone,
+      userRole: req.user?.role,
+      userId: req.user?.id
+    });
+
+    // Validate required fields
+    if (!name || !email || !password || !role) {
+      console.log('Missing required fields:', { name: !!name, email: !!email, password: !!password, role: !!role });
+      return res.status(400).json({ 
+        message: 'Missing required fields',
+        details: { name: !!name, email: !!email, password: !!password, role: !!role }
+      });
+    }
+
+    // Validate role
+    if (!['admin', 'staff', 'executive'].includes(role)) {
+      console.log('Invalid role received:', role);
+      return res.status(400).json({ 
+        message: 'Invalid role specified',
+        receivedRole: role,
+        validRoles: ['admin', 'staff', 'executive']
+      });
+    }
+
+    // Special logging for executive role
+    if (role === 'executive') {
+      console.log('Creating executive staff member...');
+      console.log('Environment:', process.env.NODE_ENV);
+      console.log('MongoDB connection state:', mongoose.connection.readyState);
+      console.log('User making request:', {
+        id: req.user?.id,
+        role: req.user?.role,
+        email: req.user?.email
+      });
+    }
+
     // Check if email already exists
     const existingStaff = await Staff.findOne({ email });
     if (existingStaff) {
+      console.log('Email already exists:', email);
       return res.status(400).json({ message: 'Email already exists' });
     }
+
+    console.log('Creating new staff member with role:', role);
 
     const staff = new Staff({
       name,
@@ -46,14 +90,58 @@ export const createStaff = async (req: Request, res: Response) => {
       phone,
     });
 
+    // Validate the staff document before saving
+    const validationError = staff.validateSync();
+    if (validationError) {
+      console.error('Validation error before save:', validationError);
+      return res.status(400).json({ 
+        message: 'Validation error',
+        details: validationError.errors 
+      });
+    }
+
+    console.log('Attempting to save staff member...');
     await staff.save();
     
     // Create a new object without the password field
     const { password: _, ...staffWithoutPassword } = staff.toObject();
     
+    console.log('Staff member created successfully:', staffWithoutPassword);
+    
     res.status(201).json(staffWithoutPassword);
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating staff member' });
+  } catch (error: any) {
+    console.error('Detailed error creating staff:', {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+      errors: error.errors,
+      keyPattern: error.keyPattern,
+      keyValue: error.keyValue,
+      userRole: req.user?.role,
+      userId: req.user?.id
+    });
+    
+    // Check for specific error types
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        message: 'Validation error',
+        details: error.errors 
+      });
+    }
+    
+    if (error.code === 11000) { // MongoDB duplicate key error
+      return res.status(400).json({ 
+        message: 'Duplicate key error',
+        field: Object.keys(error.keyPattern)[0]
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Error creating staff member',
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 

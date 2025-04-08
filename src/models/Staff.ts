@@ -11,7 +11,7 @@ export interface IStaff extends Document {
   name: string;
   email: string;
   password: string;
-  role: 'admin' | 'staff';
+  role: 'admin' | 'staff' | 'executive';
   phone?: string;
   createdAt: Date;
   attendance: IAttendance[];
@@ -54,7 +54,10 @@ const staffSchema = new Schema<IStaff>({
   },
   role: {
     type: String,
-    enum: ['admin', 'staff'],
+    enum: {
+      values: ['admin', 'staff', 'executive'],
+      message: 'Role must be either admin, staff, or executive'
+    },
     default: 'staff',
   },
   phone: {

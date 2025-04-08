@@ -35,17 +35,17 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/admin-das
       console.log('Admin user created');
     }
 
-    // Initialize Special Staff if not exists
-    const specialStaffExists = await Staff.findOne({ email: 'special@electrical.com' });
-    if (!specialStaffExists) {
+    // Initialize Staff user if not exists
+    const staffExists = await Staff.findOne({ email: 'staff@electrical.com' });
+    if (!staffExists) {
       await Staff.create({
-        name: 'Special Staff',
-        email: 'special@electrical.com',
-        password: 'special123',
+        name: 'Staff User',
+        email: 'staff@electrical.com',
+        password: 'staff123',
         role: 'staff',
         phone: '+1 (555) 999-9999',
       });
-      console.log('Special Staff created');
+      console.log('Staff user created');
     }
   })
   .catch((error) => {
@@ -56,6 +56,28 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/admin-das
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/staff', staffRoutes);
+
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    // Check MongoDB connection
+    const dbState = mongoose.connection.readyState;
+    const dbStatus = dbState === 1 ? 'connected' : 'disconnected';
+    
+    res.json({
+      status: 'ok',
+      database: dbStatus,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 app.use('/', (req, res) => {res.json("Welcome to Sarathi")});
 
 // Error handling middleware
