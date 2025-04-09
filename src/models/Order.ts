@@ -21,6 +21,7 @@ export interface IOrder extends Document {
   createdBy: string;
   assignedTo?: string;
   paymentCondition: 'immediate' | 'days15' | 'days30';
+  priority: 'high' | 'medium' | 'low';
   dispatchDate?: Date;
   scheduledDate?: Date;
   orderImage?: string;
@@ -58,6 +59,11 @@ const OrderSchema = new Schema({
     type: String, 
     enum: ['immediate', 'days15', 'days30'],
     default: 'immediate'
+  },
+  priority: {
+    type: String,
+    enum: ['high', 'medium', 'low'],
+    default: 'medium'
   },
   dispatchDate: { type: Date },
   scheduledDate: { type: Date },
