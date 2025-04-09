@@ -9,6 +9,7 @@ import {
   markOrderAsPaid,
   getOrdersByDateRange,
   getOrdersByAssignedTo,
+  getOrdersByCreator,
 } from '../controllers/orderController';
 import { upload } from '../config/cloudinary';
 
@@ -38,6 +39,9 @@ router.get('/date-range/:startDate/:endDate', getOrdersByDateRange as RequestHan
 
 // Get orders by assigned staff
 router.get('/assigned/:staffId', getOrdersByAssignedTo as RequestHandler);
+
+// Get orders by creator
+router.get('/created/:staffId', getOrdersByCreator as RequestHandler);
 
 // Get order by ID
 router.get('/:id', getOrder as RequestHandler);

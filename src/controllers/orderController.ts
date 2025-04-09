@@ -210,4 +210,30 @@ export const getOrdersByAssignedTo = async (req: Request, res: Response): Promis
     console.error('Error fetching orders by assigned staff:', error);
     res.status(500).json({ message: 'Error fetching orders by assigned staff', error });
   }
+};
+
+// Get orders created by staff
+export const getOrdersByCreator = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { staffId } = req.params;
+    
+    if (!staffId) {
+      res.status(400).json({ message: 'Staff ID is required' });
+      return;
+    }
+    
+    console.log(`Searching for orders created by staff ID: ${staffId}`);
+    
+    // Find orders where createdBy is the given staffId
+    const orders = await Order.find({
+      createdBy: staffId
+    }).sort({ createdAt: -1 });
+    
+    console.log(`Found ${orders.length} orders created by staff ID: ${staffId}`);
+    
+    res.json(orders);
+  } catch (error) {
+    console.error('Error fetching orders by creator:', error);
+    res.status(500).json({ message: 'Error fetching orders by creator', error });
+  }
 }; 
