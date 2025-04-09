@@ -79,14 +79,4 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
   } catch (error) {
     res.status(500).json({ message: 'Error deleting product', error });
   }
-};
-
-// Get products by category
-export const getProductsByCategory = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const products = await Product.find({ category: req.params.category }).sort({ createdAt: -1 });
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching products by category', error });
-  }
 }; 

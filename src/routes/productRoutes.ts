@@ -1,31 +1,28 @@
-import express from 'express';
-import {
-  getProducts,
+import { Router } from 'express';
+import { 
+  getProducts, 
   getProduct,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  getProductsByCategory
+  createProduct, 
+  updateProduct, 
+  deleteProduct 
 } from '../controllers/productController';
+import { authenticateToken } from '../middleware/auth';
 
-const router = express.Router();
+const router = Router();
 
 // Get all products
 router.get('/', getProducts);
 
-// Get products by category - this must come before the :id route
-router.get('/category/:category', getProductsByCategory);
-
 // Get product by ID
 router.get('/:id', getProduct);
 
-// Create new product
-router.post('/', createProduct);
+// Create new product (authenticated)
+router.post('/', authenticateToken, createProduct);
 
-// Update product
-router.put('/:id', updateProduct);
+// Update product (authenticated)
+router.put('/:id', authenticateToken, updateProduct);
 
-// Delete product
-router.delete('/:id', deleteProduct);
+// Delete product (authenticated)
+router.delete('/:id', authenticateToken, deleteProduct);
 
 export default router; 
