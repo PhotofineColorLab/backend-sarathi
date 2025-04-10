@@ -70,13 +70,17 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
 // Delete product
 export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('Deleting product with ID:', req.params.id);
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) {
+      console.log('Product not found for deletion');
       res.status(404).json({ message: 'Product not found' });
       return;
     }
-    res.json({ message: 'Product deleted successfully' });
+    console.log('Product deleted successfully:', product.name);
+    res.json({ message: 'Product deleted successfully', product });
   } catch (error) {
+    console.error('Error deleting product:', error);
     res.status(500).json({ message: 'Error deleting product', error });
   }
 }; 
