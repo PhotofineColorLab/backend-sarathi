@@ -29,11 +29,27 @@ export const getProduct = async (req: Request, res: Response): Promise<void> => 
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     console.log('Received product data:', JSON.stringify(req.body, null, 2));
+    
+    // Log the product schema for debugging
+    console.log('Product schema:', JSON.stringify(Product.schema.obj.dimension, null, 2));
+    
     const product = new Product(req.body);
     await product.save();
     res.status(201).json(product);
   } catch (error: any) {
     console.error('Product creation error:', error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    
+    if (error.errors) {
+      Object.keys(error.errors).forEach(key => {
+        console.error(`Field "${key}" error:`, error.errors[key].message);
+        if (error.errors[key].kind === 'enum') {
+          console.error(`  Valid enum values:`, error.errors[key].properties.enumValues);
+          console.error(`  Received value:`, error.errors[key].value);
+        }
+      });
+    }
     
     // Check for MongoDB validation errors
     if (error.name === 'ValidationError') {
