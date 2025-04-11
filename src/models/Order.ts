@@ -22,7 +22,7 @@ export interface IOrder extends Document {
   createdBy: string;
   assignedTo?: string;
   paymentCondition: 'immediate' | 'days15' | 'days30';
-  priority: 'high' | 'medium' | 'low';
+  priority: 'urgent' | 'normal';
   dispatchDate?: Date;
   scheduledDate?: Date;
   orderImage?: string;
@@ -64,8 +64,8 @@ const OrderSchema = new Schema({
   },
   priority: {
     type: String,
-    enum: ['high', 'medium', 'low'],
-    default: 'medium'
+    enum: ['urgent', 'normal'],
+    default: 'normal'
   },
   dispatchDate: { type: Date },
   scheduledDate: { type: Date },
