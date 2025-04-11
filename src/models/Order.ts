@@ -12,6 +12,7 @@ export interface IOrder extends Document {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  customerAddress?: string;
   items: IOrderItem[];
   total: number;
   status: 'pending' | 'invoice' | 'dispatched' | 'dc';
@@ -42,6 +43,7 @@ const OrderSchema = new Schema({
   customerName: { type: String, required: true },
   customerEmail: { type: String, required: false },
   customerPhone: { type: String, required: true },
+  customerAddress: { type: String, required: false },
   items: [OrderItemSchema],
   total: { type: Number, required: true },
   status: { 
