@@ -7,6 +7,7 @@ export interface IProduct extends Document {
   price: number;
   stock: number;
   dimension?: ProductDimension;
+  threshold?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +21,7 @@ const ProductSchema = new Schema({
     enum: ['Bag', 'Bundle', 'Box', 'Carton', 'Coils', 'Dozen', 'Ft', 'Gross', 'Kg', 'Mtr', 'Pc', 'Pkt', 'Set', 'Not Applicable'],
     default: 'Pc'
   },
+  threshold: { type: Number, required: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
@@ -27,6 +29,13 @@ const ProductSchema = new Schema({
 // Update the updatedAt timestamp before saving
 ProductSchema.pre('save', function(next) {
   this.updatedAt = new Date();
+  console.log('Saving product with data:', JSON.stringify(this, null, 2));
+  next();
+});
+
+// Add a pre-hook for findOneAndUpdate to log updates
+ProductSchema.pre('findOneAndUpdate', function(next) {
+  console.log('Updating product with data:', JSON.stringify(this.getUpdate(), null, 2));
   next();
 });
 

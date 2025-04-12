@@ -5,6 +5,18 @@ import Product, { IProduct } from '../models/Product';
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
+    
+    // Log the first product data
+    if (products.length > 0) {
+      console.log('Sample product from database:', JSON.stringify(products[0], null, 2));
+      
+      // Check explicitly for threshold field
+      const firstProduct = products[0];
+      console.log('Threshold value:', firstProduct.threshold);
+      console.log('Threshold type:', typeof firstProduct.threshold);
+      console.log('All product keys:', Object.keys(firstProduct.toObject()));
+    }
+    
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching products', error });
