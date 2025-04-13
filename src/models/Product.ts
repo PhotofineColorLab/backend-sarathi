@@ -4,7 +4,6 @@ export type ProductDimension = 'Bag' | 'Bundle' | 'Box' | 'Carton' | 'Coils' | '
 
 export interface IProduct extends Document {
   name: string;
-  price: number;
   stock: number;
   dimension?: ProductDimension;
   threshold?: number;
@@ -14,7 +13,6 @@ export interface IProduct extends Document {
 
 const ProductSchema = new Schema({
   name: { type: String, required: true },
-  price: { type: Number, required: true },
   stock: { type: Number, required: true, default: 0 },
   dimension: {
     type: String,
