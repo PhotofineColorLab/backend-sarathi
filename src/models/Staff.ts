@@ -9,10 +9,10 @@ interface IAttendance {
 
 export interface IStaff extends Document {
   name: string;
-  email: string;
+  phone: string;
   password: string;
   role: 'admin' | 'staff' | 'executive';
-  phone?: string;
+  email?: string;
   createdAt: Date;
   attendance: IAttendance[];
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -39,10 +39,15 @@ const staffSchema = new Schema<IStaff>({
     required: [true, 'Name is required'],
     trim: true,
   },
+  phone: {
+    type: String,
+    required: [true, 'Phone number is required'],
+    unique: true,
+    trim: true,
+    match: [/^\d{10}$/, 'Please enter a valid 10-digit phone number'],
+  },
   email: {
     type: String,
-    required: [true, 'Email is required'],
-    unique: true,
     trim: true,
     lowercase: true,
     match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email'],
@@ -59,10 +64,6 @@ const staffSchema = new Schema<IStaff>({
       message: 'Role must be either admin, staff, or executive'
     },
     default: 'staff',
-  },
-  phone: {
-    type: String,
-    trim: true,
   },
   createdAt: {
     type: Date,

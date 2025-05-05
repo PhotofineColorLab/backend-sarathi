@@ -5,7 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 interface JwtPayload {
   id: string;
-  email: string;
+  phone: string;
   role: string;
 }
 

@@ -23,27 +23,27 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/admin-das
     console.log('Connected to MongoDB');
 
     // Initialize admin user if not exists
-    const adminExists = await Staff.findOne({ email: 'admin@electrical.com' });
+    const adminExists = await Staff.findOne({ phone: '9876543210' });
     if (!adminExists) {
       await Staff.create({
         name: 'Admin User',
-        email: 'admin@electrical.com',
+        phone: '9876543210',
         password: 'admin123',
         role: 'admin',
-        phone: '+1 (555) 123-4567',
+        email: 'admin@electrical.com',
       });
       console.log('Admin user created');
     }
 
     // Initialize Staff user if not exists
-    const staffExists = await Staff.findOne({ email: 'staff@electrical.com' });
+    const staffExists = await Staff.findOne({ phone: '9876543211' });
     if (!staffExists) {
       await Staff.create({
         name: 'Staff User',
-        email: 'staff@electrical.com',
+        phone: '9876543211',
         password: 'staff123',
         role: 'staff',
-        phone: '+1 (555) 999-9999',
+        email: 'staff@electrical.com',
       });
       console.log('Staff user created');
     }

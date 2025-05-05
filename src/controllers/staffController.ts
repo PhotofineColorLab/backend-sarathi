@@ -31,23 +31,23 @@ export const getStaffMember = async (req: Request, res: Response) => {
 // Create a new staff member
 export const createStaff = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, role, phone } = req.body;
+    const { name, phone, password, role, email } = req.body;
 
     console.log('Received staff creation request:', { 
       name, 
-      email, 
+      phone, 
       role, 
-      phone,
+      email,
       userRole: req.user?.role,
       userId: req.user?.id
     });
 
     // Validate required fields
-    if (!name || !email || !password || !role) {
-      console.log('Missing required fields:', { name: !!name, email: !!email, password: !!password, role: !!role });
+    if (!name || !phone || !password || !role) {
+      console.log('Missing required fields:', { name: !!name, phone: !!phone, password: !!password, role: !!role });
       return res.status(400).json({ 
         message: 'Missing required fields',
-        details: { name: !!name, email: !!email, password: !!password, role: !!role }
+        details: { name: !!name, phone: !!phone, password: !!password, role: !!role }
       });
     }
 
@@ -69,25 +69,25 @@ export const createStaff = async (req: Request, res: Response) => {
       console.log('User making request:', {
         id: req.user?.id,
         role: req.user?.role,
-        email: req.user?.email
+        phone: req.user?.phone
       });
     }
 
-    // Check if email already exists
-    const existingStaff = await Staff.findOne({ email });
+    // Check if phone already exists
+    const existingStaff = await Staff.findOne({ phone });
     if (existingStaff) {
-      console.log('Email already exists:', email);
-      return res.status(400).json({ message: 'Email already exists' });
+      console.log('Phone number already exists:', phone);
+      return res.status(400).json({ message: 'Phone number already exists' });
     }
 
     console.log('Creating new staff member with role:', role);
 
     const staff = new Staff({
       name,
-      email,
+      phone,
       password,
       role,
-      phone,
+      email,
     });
 
     // Validate the staff document before saving
@@ -148,8 +148,8 @@ export const createStaff = async (req: Request, res: Response) => {
 // Update a staff member
 export const updateStaff = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, role, phone } = req.body;
-    const updateData: any = { name, email, role, phone };
+    const { name, phone, password, role, email } = req.body;
+    const updateData: any = { name, phone, role, email };
 
     // Only update password if provided
     if (password) {
@@ -187,10 +187,10 @@ export const deleteStaff = async (req: Request, res: Response) => {
 // Staff login
 export const loginStaff = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { phone, password } = req.body;
 
     // Find staff member
-    const staff = await Staff.findOne({ email });
+    const staff = await Staff.findOne({ phone });
     if (!staff) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -205,7 +205,7 @@ export const loginStaff = async (req: Request, res: Response) => {
     const token = jwt.sign(
       { 
         id: staff._id,
-        email: staff.email,
+        phone: staff.phone,
         role: staff.role 
       },
       JWT_SECRET,
@@ -356,7 +356,7 @@ export const getAllStaffAttendanceByDate = async (req: Request, res: Response) =
       return {
         staffId: staff._id,
         name: staff.name,
-        email: staff.email,
+        phone: staff.phone,
         role: staff.role,
         attendance: attendanceForDate || null
       };
