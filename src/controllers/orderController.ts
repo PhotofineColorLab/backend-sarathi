@@ -84,18 +84,25 @@ export const updateOrder = async (req: Request, res: Response): Promise<void> =>
       const result = await cloudinary.uploader.upload(req.file.path);
       req.body.orderImage = result.secure_url;
     }
+
+    // Log the update operation for debugging
+    console.log(`Updating order ${req.params.id} with data:`, req.body);
     
     const order = await Order.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
+
     if (!order) {
       res.status(404).json({ message: 'Order not found' });
       return;
     }
+    
+    console.log(`Order updated successfully:`, order);
     res.json(order);
   } catch (error) {
+    console.error('Error updating order:', error);
     res.status(400).json({ message: 'Error updating order', error });
   }
 };
@@ -235,5 +242,37 @@ export const getOrdersByCreator = async (req: Request, res: Response): Promise<v
   } catch (error) {
     console.error('Error fetching orders by creator:', error);
     res.status(500).json({ message: 'Error fetching orders by creator', error });
+  }
+};
+
+// Assign delivery person to an order
+export const assignDeliveryPerson = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const { deliveryPersonId } = req.body;
+    
+    if (!deliveryPersonId) {
+      res.status(400).json({ message: 'Delivery person ID is required' });
+      return;
+    }
+    
+    console.log(`Assigning delivery person ${deliveryPersonId} to order ${orderId}`);
+    
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      { deliveryPerson: deliveryPersonId },
+      { new: true, runValidators: true }
+    );
+    
+    if (!updatedOrder) {
+      res.status(404).json({ message: 'Order not found' });
+      return;
+    }
+    
+    console.log('Delivery person assigned successfully:', updatedOrder);
+    res.json(updatedOrder);
+  } catch (error) {
+    console.error('Error assigning delivery person:', error);
+    res.status(500).json({ message: 'Error assigning delivery person', error });
   }
 }; 

@@ -21,6 +21,7 @@ export interface IOrder extends Document {
   updatedAt: Date;
   createdBy: string;
   assignedTo?: string;
+  deliveryPerson?: string;
   paymentCondition: 'immediate' | 'days15' | 'days30';
   priority: 'urgent' | 'normal';
   dispatchDate?: Date;
@@ -57,6 +58,7 @@ const OrderSchema = new Schema({
   updatedAt: { type: Date, default: Date.now },
   createdBy: { type: String, required: true },
   assignedTo: { type: String, default: null },
+  deliveryPerson: { type: String, default: null },
   paymentCondition: { 
     type: String, 
     enum: ['immediate', 'days15', 'days30'],

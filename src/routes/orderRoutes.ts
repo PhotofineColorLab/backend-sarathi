@@ -10,6 +10,7 @@ import {
   getOrdersByDateRange,
   getOrdersByAssignedTo,
   getOrdersByCreator,
+  assignDeliveryPerson,
 } from '../controllers/orderController';
 import { upload } from '../config/cloudinary';
 
@@ -54,6 +55,9 @@ router.put('/:id', upload.single('orderImage'), parseOrderData, updateOrder as R
 
 // Mark order as paid
 router.put('/:id/paid', markOrderAsPaid as RequestHandler);
+
+// Assign delivery person to order
+router.put('/:orderId/delivery-person', assignDeliveryPerson as RequestHandler);
 
 // Delete order
 router.delete('/:id', deleteOrder as RequestHandler);
