@@ -18,11 +18,16 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'electra-admin-orders',
     allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
-    transformation: [{ width: 1000, crop: 'limit' }],
+    transformation: [
+      { width: 1000, crop: 'limit' },
+      { quality: 'auto:good' }, // Use Cloudinary's automatic quality optimization
+      { fetch_format: 'auto' }, // Automatically choose the best format (WebP when supported)
+      { flags: 'lossy' }, // Apply lossy compression
+    ],
   } as any,
 });
 
 // Create multer upload middleware
 const upload = multer({ storage });
 
-export { cloudinary, upload }; 
+export { cloudinary, upload };
